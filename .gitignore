@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pickle
+*.egg-info/
+*.ipynb_checkpoints/
+
+.idea/
+.vscode/
+
+docker/secrets/
+
+
+docker/app/.env
+docker/app/postgres_password.txt
+docker/app/tuner_password.txt
+
+logs/*
+!logs/.gitkeep
+

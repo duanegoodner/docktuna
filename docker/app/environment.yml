@@ -1,0 +1,37 @@
+name: null
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - black
+  - dill
+  - isort
+  - jupyter
+  - jupyterlab
+  - matplotlib
+  - msgspec
+  - numpy
+  - pandas
+  - pip
+  - psycopg2
+  - pyarrow
+  - python=3.10.9
+  - python-dotenv
+  - scikit-learn
+  - seaborn
+  - setuptools
+  - toml
+  - pip:
+    - git+https://github.com/duanegoodner/pygetfacl@0.0.5
+    - graphviz
+    - jupyterlab_limit_output
+    - optuna
+    - tensorboard
+    - torch
+    - torchview
+    - torchvision
+
+
+

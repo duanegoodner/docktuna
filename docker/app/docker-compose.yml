@@ -1,0 +1,66 @@
+secrets:
+  tuningdb_postgres_password:
+    file: ../secrets/tuningdb_postgres_password.txt
+  tuningdb_tuner_password:
+    file: ../secrets/tuningdb_tuner_password.txt
+
+services:
+  lstm_aa_app_x:
+    env_file:
+      - .env
+    image: lstm_aa_app_x
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+    secrets:
+      - tuningdb_tuner_password
+    build:
+      context: ../
+      dockerfile: ./app/Dockerfile
+      args:
+        - PRIMARY_UID=${UID}
+        - PRIMARY_GID=${GID}
+        - PRIMARY_USER=gen_user
+
+    container_name: lstm_aa_app_x
+    entrypoint:
+      [
+        "/bin/bash",
+        "/usr/local/entrypoints/entrypoint_simple_persistence.sh"
+      ]
+    volumes:
+      - ${LOCAL_PROJECT_ROOT}:/home/gen_user/project
+      - /etc/localtime:/etc/localtime:ro
+
+    ports:
+      - "127.0.0.1:8888:8888"
+
+    init: true
+    stdin_open: true
+    tty: true
+
+  postgres_optuna_x:
+    env_file:
+      - ../databases/tuning_dbs.env
+    image: postgres
+    container_name: postgres_optuna_x
+    volumes:
+      - optuna_db_x:/var/lib/postgresql/data
+      - ../pg_init_scripts:/docker-entrypoint-initdb.d
+    ports:
+      - 5556:5432
+    secrets:
+      - tuningdb_postgres_password
+      - tuningdb_tuner_password
+
+volumes:
+  optuna_db_x:
+
+
+
+
+
