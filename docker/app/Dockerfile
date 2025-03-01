@@ -2,7 +2,7 @@ FROM python:3.11.11-slim-bookworm
 ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
-ARG COMPONENTS=./app_resources/components
+ARG COMPONENTS=./image_resources/components
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
@@ -41,4 +41,4 @@ WORKDIR /home/${PRIMARY_USER}/project
 RUN sudo rm -rf ${BUILD_DIR}
 
 RUN sudo mkdir -p /usr/local/entrypoints
-COPY ./app_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
+COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints

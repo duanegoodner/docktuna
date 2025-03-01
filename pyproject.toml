@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "dummy-project"
+version = "0.1.0"
+description = "Only managing dependencies"
+authors = ["Your Name <you@example.com>"]
+package-mode = false  # (Optional: prevents packaging your code)
+
+[tool.poetry.dependencies]
+python = "^3.11"
+flask = "^2.2"
+numpy = "^1.24"
+pandas = "^1.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
