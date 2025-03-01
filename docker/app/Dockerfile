@@ -7,9 +7,9 @@ ARG COMPONENTS=./app_resources/components
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
-# Upgrade pip and install Optuna
+# Upgrade pip and install Python packges
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir dotenv optuna psycopg2 toml
+    && pip install --no-cache-dir dotenv optuna psycopg2
 
 COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
 RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
