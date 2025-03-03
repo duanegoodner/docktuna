@@ -11,7 +11,7 @@ def reset_global_optuna_db():
     get_optuna_db.__globals__["OPTUNA_DB"] = None
 
 def test_get_optuna_db():
-    """Test that get_optuna_db() initializes correctly."""
+    """get_optuna_db() initializes correctly."""
     db = get_optuna_db()
     assert db is not None  # Ensure initialization works
 
@@ -20,7 +20,7 @@ def test_get_optuna_db_twice():
     db_b = get_optuna_db()
 
 def test_get_optuna_db_failure():
-    """Test that get_optuna_db() properly handles database initialization failure."""
+    """get_optuna_db() properly handles database initialization failure."""
 
     with patch("docktuna.optuna_db.db_instance.OptunaDatabase") as MockOptunaDatabase:
         mock_instance = MockOptunaDatabase.return_value
