@@ -1,9 +1,10 @@
 import datetime
-import optuna
 from contextlib import contextmanager
-from urllib.parse import quote
-from optuna.storages import RDBStorage
 from pathlib import Path
+from urllib.parse import quote
+
+import optuna
+from optuna.storages import RDBStorage
 
 
 @contextmanager

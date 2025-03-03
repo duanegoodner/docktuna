@@ -1,6 +1,9 @@
+from unittest.mock import PropertyMock, patch
+
 import pytest
-from unittest.mock import patch, PropertyMock
+
 from docktuna.optuna_db.db_instance import get_optuna_db
+
 
 @pytest.fixture(autouse=True)
 def reset_global_optuna_db():

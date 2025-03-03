@@ -1,6 +1,8 @@
 import optuna
 import pytest
-from docktuna.optuna_db.optuna_db import OptunaDatabase, temporary_optuna_verbosity
+
+from docktuna.optuna_db.optuna_db import (OptunaDatabase,
+                                          temporary_optuna_verbosity)
 
 
 def simple_objective(trial: optuna.Trial) -> float:
