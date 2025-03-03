@@ -3,6 +3,8 @@ import os
 from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
+from sqlalchemy import create_engine
+from sqlalchemy.pool import QueuePool
 from typing import Any
 from urllib.parse import quote
 
@@ -10,30 +12,34 @@ import optuna.study
 from dotenv import load_dotenv
 from optuna.storages import RDBStorage
 
-# from lstm_adversarial_attack.config.read_write import PATH_CONFIG_READER
+
+# def get_db_dotenv_info(
+#     db_name_var: str,
+#     dotenv_path: Path = Path(__file__).parent.parent.parent.parent
+#     / "docker"
+#     / "databases"
+#     / "tuning_dbs.env",
+#     username_var: str = "TUNING_DBS_USER",
+#     password_file_var: str = "TUNING_DBS_PASSWORD_FILE",
+#     host_var: str = "POSTGRES_DBS_HOST",
+# ) -> dict:
+#     load_dotenv(dotenv_path=dotenv_path)
+#     password_file = os.getenv(password_file_var)
+#     with Path(password_file).open(mode="r") as in_file:
+#         password = in_file.read()
+
+#     return {
+#         "user": os.getenv(username_var),
+#         "password": password,
+#         "db_name": os.getenv(db_name_var),
+#         "host": os.getenv(host_var),
+#     }
 
 
-def get_db_dotenv_info(
-    db_name_var: str,
-    dotenv_path: Path = Path(__file__).parent.parent.parent.parent
-    / "docker"
-    / "databases"
-    / "tuning_dbs.env",
-    username_var: str = "TUNING_DBS_USER",
-    password_file_var: str = "TUNING_DBS_PASSWORD_FILE",
-    host_var: str = "POSTGRES_DBS_HOST",
-) -> dict:
-    load_dotenv(dotenv_path=dotenv_path)
-    password_file = os.getenv(password_file_var)
-    with Path(password_file).open(mode="r") as in_file:
-        password = in_file.read()
-
-    return {
-        "user": os.getenv(username_var),
-        "password": password,
-        "db_name": os.getenv(db_name_var),
-        "host": os.getenv(host_var),
-    }
+def read_secret(secret_name: str) -> str:
+    with Path(f"/run/secrets/{secret_name}").open(mode="r") as f:
+        file_content = f.read()
+        return file_content.strip()
 
 
 @contextmanager
@@ -47,6 +53,8 @@ def temporary_optuna_verbosity(logging_level: int):
 
 
 class OptunaDatabase:
+    _engine = None
+
     def __init__(
         self,
         user: str,
@@ -62,6 +70,15 @@ class OptunaDatabase:
         self._host = host
         self._db_dialect = db_dialect
         self._db_driver = db_driver
+
+        if OptunaDatabase._engine is None:
+            OptunaDatabase._engine = create_engine(
+                url=self._db_url,
+                poolclass=QueuePool,
+                pool_size=5,
+                max_overflow=10,
+                pool_pre_ping=True,
+            )
 
     @classmethod
     def from_dotenv_info(
@@ -121,7 +138,7 @@ class OptunaDatabase:
     def get_all_studies(self) -> list[optuna.Study]:
         # reduce logging verbosity to avoid msg about creating study from db
         with temporary_optuna_verbosity(logging_level=optuna.logging.WARNING):
-        # optuna.logging.set_verbosity(optuna.logging.WARNING)
+            # optuna.logging.set_verbosity(optuna.logging.WARNING)
             study_names = [item.study_name for item in self.study_summaries]
             return [self.get_study(study_name=study_name) for study_name in study_names]
 
@@ -147,10 +164,17 @@ class OptunaDatabase:
         return sorted_studies[0]
 
 
-model_tuning_db_info = get_db_dotenv_info(db_name_var="MODEL_TUNING_DB_NAME")
-MODEL_TUNING_DB = OptunaDatabase(**model_tuning_db_info)
+# model_tuning_db_info = get_db_dotenv_info(db_name_var="MODEL_TUNING_DB_NAME")
+username = read_secret(secret_name="tuning_dbs_user")
+user_password = read_secret(secret_name="tuningdb_tuner_password")
+db_name = read_secret(secret_name="model_tuning_db_name")
+hostname = read_secret(secret_name="postgres_dbs_host")
+
+MODEL_TUNING_DB = OptunaDatabase(
+    user=username, password=user_password, db_name=db_name, host=hostname
+)
 MODEL_TUNING_STORAGE = MODEL_TUNING_DB.storage
 
-attack_tuning_db_info = get_db_dotenv_info(db_name_var="ATTACK_TUNING_DB_NAME")
-ATTACK_TUNING_DB = OptunaDatabase(**attack_tuning_db_info)
-ATTACK_TUNING_STORAGE = ATTACK_TUNING_DB.storage
+# attack_tuning_db_info = get_db_dotenv_info(db_name_var="ATTACK_TUNING_DB_NAME")
+# ATTACK_TUNING_DB = OptunaDatabase(**attack_tuning_db_info)
+# ATTACK_TUNING_STORAGE = ATTACK_TUNING_DB.storage

@@ -50,5 +50,5 @@ EOSQL
 create_user "$TUNING_DBS_USER" "$TUNING_DBS_PASSWORD_FILE"
 create_database "$MODEL_TUNING_DB_NAME"
 grant_privileges "$MODEL_TUNING_DB_NAME" "$TUNING_DBS_USER"
-create_database "$ATTACK_TUNING_DB_NAME"
-grant_privileges "$ATTACK_TUNING_DB_NAME" "$TUNING_DBS_USER"
+# create_database "$ATTACK_TUNING_DB_NAME"
+# grant_privileges "$ATTACK_TUNING_DB_NAME" "$TUNING_DBS_USER"

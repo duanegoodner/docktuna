@@ -1,8 +1,17 @@
 secrets:
+  postgres_dbs_host:
+    file: ../secrets/postgres_dbs_host.txt
+  postgres_user:
+    file: ../secrets/postgres_user.txt
+  model_tuning_db_name:
+    file: ../secrets/model_tuning_db_name.txt
   tuningdb_postgres_password:
     file: ../secrets/tuningdb_postgres_password.txt
   tuningdb_tuner_password:
     file: ../secrets/tuningdb_tuner_password.txt
+  tuning_dbs_user:
+    file: ../secrets/tuning_dbs_user.txt
+  
 
 services:
   lstm_aa_app_x:
@@ -17,7 +26,10 @@ services:
               count: 1
               capabilities: [ gpu ]
     secrets:
+      - tuning_dbs_user
       - tuningdb_tuner_password
+      - model_tuning_db_name
+      - postgres_dbs_host
     build:
       context: ../
       dockerfile: ./app/Dockerfile
