@@ -1,21 +1,22 @@
 import datetime
 import optuna
+from contextlib import contextmanager
 from urllib.parse import quote
 from optuna.storages import RDBStorage
 from pathlib import Path
 
 
-def read_secret(secret_name: str) -> str:
-    """Safely reads a secret from /run/secrets/."""
-    path = f"/run/secrets/{secret_name}"
+@contextmanager
+def temporary_optuna_verbosity(logging_level: int):
+    original_verbosity = optuna.logging.get_verbosity()
+    optuna.logging.set_verbosity(logging_level)
     try:
-        with open(path, "r") as f:
-            file_content = f.read()
-            return file_content.strip()
-    except FileNotFoundError:
-        raise Exception(f"Secret {secret_name} not found!")
+        yield
+    finally:
+        optuna.logging.set_verbosity(original_verbosity)
 
-class OptunaDatabaseNew:
+
+class OptunaDatabase:
     def __init__(
         self,
         username_secret: str,
@@ -81,19 +82,23 @@ class OptunaDatabaseNew:
         )
 
     def get_best_params(self, study_name: str) -> dict[str, any]:
-        return self.get_study_summary(study_name).best_trial.params
+        study_summary = self.get_study_summary(study_name=study_name)
+        if study_summary is None or study_summary.best_trial is None:
+            return {}
+        return study_summary.best_trial.params
 
     def get_study(self, study_name: str) -> optuna.Study:
-        optuna.logging.set_verbosity(optuna.logging.WARNING)
-        return optuna.create_study(
-            study_name=study_name, storage=self.storage, load_if_exists=True
-        )
+        with temporary_optuna_verbosity(logging_level=optuna.logging.WARNING):
+            return optuna.create_study(
+                study_name=study_name, storage=self.storage, load_if_exists=True
+            )
 
     def get_all_studies(self) -> list[optuna.Study]:
-        return [
-            self.get_study(study_name)
-            for study_name in {summary.study_name for summary in self.study_summaries}
-        ]
+        with temporary_optuna_verbosity(logging_level=optuna.logging.WARNING):
+            return [
+                self.get_study(study_name)
+                for study_name in {summary.study_name for summary in self.study_summaries}
+            ]
     
     @property
     def num_existing_studies(self) -> int:
@@ -122,7 +127,7 @@ class OptunaDatabaseNew:
 
 
 
-# MODEL_TUNING_DB = OptunaDatabaseNew(
+# MODEL_TUNING_DB = OptunaDatabase(
 #     username_secret="tuning_dbs_user",
 #     db_password_secret="tuningdb_tuner_password",
 #     db_name_secret="model_tuning_db_name",

@@ -1,16 +1,9 @@
-import sys
-from pathlib import Path
 
-# sys.path.append(str(Path(__file__).parent.parent.parent))
-# import tuning_studies_database as tdb
-from docktuna.tuning_db.db_instance import get_optuna_db
-from docktuna.tuning_db.optuna_db_new import (
-    OptunaDatabaseNew,
-    # ATTACK_TUNING_DB,
-)
+from docktuna.optuna_db.db_instance import get_optuna_db
+from docktuna.optuna_db.optuna_db import OptunaDatabase
 
 
-def test_tuning_study_db(db: OptunaDatabaseNew):
+def check_for_tuning_studies(db: OptunaDatabase):
     try:
         tuning_studies = db.get_all_studies()
         print(
@@ -25,5 +18,4 @@ def test_tuning_study_db(db: OptunaDatabaseNew):
 if __name__ == "__main__":
     my_db = get_optuna_db()
 
-    test_tuning_study_db(db=my_db)
-    # test_tuning_study_db(db=ATTACK_TUNING_DB)
+    check_for_tuning_studies(db=my_db)
