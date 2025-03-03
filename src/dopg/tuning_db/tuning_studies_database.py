@@ -1,5 +1,6 @@
 import datetime
 import os
+from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,16 @@ def get_db_dotenv_info(
         "db_name": os.getenv(db_name_var),
         "host": os.getenv(host_var),
     }
+
+
+@contextmanager
+def temporary_optuna_verbosity(logging_level: int):
+    original_verbosity = optuna.logging.get_verbosity()
+    optuna.logging.set_verbosity(logging_level)
+    try:
+        yield
+    finally:
+        optuna.logging.set_verbosity(original_verbosity)
 
 
 class OptunaDatabase:
@@ -109,9 +120,10 @@ class OptunaDatabase:
 
     def get_all_studies(self) -> list[optuna.Study]:
         # reduce logging verbosity to avoid msg about creating study from db
-        optuna.logging.set_verbosity(optuna.logging.WARNING)
-        study_names = [item.study_name for item in self.study_summaries]
-        return [self.get_study(study_name=study_name) for study_name in study_names]
+        with temporary_optuna_verbosity(logging_level=optuna.logging.WARNING):
+        # optuna.logging.set_verbosity(optuna.logging.WARNING)
+            study_names = [item.study_name for item in self.study_summaries]
+            return [self.get_study(study_name=study_name) for study_name in study_names]
 
     @staticmethod
     def get_last_update_time(study: optuna.Study) -> datetime.datetime:

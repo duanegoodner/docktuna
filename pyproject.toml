@@ -1,10 +1,13 @@
 
 [tool.poetry]
-name = "docker-optuna-postgres"
+name = "dopg"
 version = "0.1.0"
-description = "Only managing dependencies"
-authors = ["Your Name <you@example.com>"]
-package-mode = false  # prevents packaging code
+description = "Tools for a using Optuna with RDB storage in a fully containerized environment"
+authors = ["Duane Goodner <dmgoodner@gmail.com>"]
+license = "MIT"
+include = ["license"]
+
+package-mode = true
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -14,7 +17,18 @@ isort = "^6.0.1"
 optuna = "^4.2.1"
 psycopg2 = "^2.9.10"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+coverage = "^7.6.12"
+pytest-cov = "^6.0.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+
+[tool.coverage.xml]
+output = "coverage.xml"
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 # sys.path.append(str(Path(__file__).parent.parent.parent))
 # import tuning_studies_database as tdb
-from tuning_studies_database import (
+from dopg.tuning_db.tuning_studies_database import (
     OptunaDatabase,
     MODEL_TUNING_DB,
     ATTACK_TUNING_DB,
