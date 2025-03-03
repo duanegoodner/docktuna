@@ -1,6 +1,6 @@
 
 [tool.poetry]
-name = "dopg"
+name = "docktuna"
 version = "0.1.0"
 description = "Tools for a using Optuna with RDB storage in a fully containerized environment"
 authors = ["Duane Goodner <dmgoodner@gmail.com>"]
