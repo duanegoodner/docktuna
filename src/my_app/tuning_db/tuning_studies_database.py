@@ -14,7 +14,10 @@ from optuna.storages import RDBStorage
 
 def get_db_dotenv_info(
     db_name_var: str,
-    dotenv_path: Path = Path(__file__).parent.parent / "docker" / "databases" / "tuning_dbs.env",
+    dotenv_path: Path = Path(__file__).parent.parent.parent.parent
+    / "docker"
+    / "databases"
+    / "tuning_dbs.env",
     username_var: str = "TUNING_DBS_USER",
     password_file_var: str = "TUNING_DBS_PASSWORD_FILE",
     host_var: str = "POSTGRES_DBS_HOST",
@@ -108,10 +111,7 @@ class OptunaDatabase:
         # reduce logging verbosity to avoid msg about creating study from db
         optuna.logging.set_verbosity(optuna.logging.WARNING)
         study_names = [item.study_name for item in self.study_summaries]
-        return [
-            self.get_study(study_name=study_name)
-            for study_name in study_names
-        ]
+        return [self.get_study(study_name=study_name) for study_name in study_names]
 
     @staticmethod
     def get_last_update_time(study: optuna.Study) -> datetime.datetime:
@@ -142,7 +142,3 @@ MODEL_TUNING_STORAGE = MODEL_TUNING_DB.storage
 attack_tuning_db_info = get_db_dotenv_info(db_name_var="ATTACK_TUNING_DB_NAME")
 ATTACK_TUNING_DB = OptunaDatabase(**attack_tuning_db_info)
 ATTACK_TUNING_STORAGE = ATTACK_TUNING_DB.storage
-
-# if __name__ == "__main__":
-# model_tuning_db = OptunaDatabase(env_var_db_name="MODEL_TUNING_DB_NAME")
-# attack_tuning_db = OptunaDatabase(env_var_db_name="ATTACK_TUNING_DB_NAME")

@@ -19,6 +19,7 @@ RUN sudo apt-get update && \
     build-essential \
     libpq-dev \
     git \
+    curl \
     wget \
     zsh \
     nano \
@@ -28,9 +29,20 @@ COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
 RUN ${BUILD_DIR}/zsh_setup/main.sh ${PRIMARY_USER} \
     && sudo rm -rf ${BUILD_DIR}/*
 
+# Install Poetry (as PRIMARY_USER)
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Ensure Poetry is in PRIMARY_USER's PATH
+ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
+
+# Persist Poetry's path in user's profile for interactive sessions
+RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
+    echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
+
+
 # Upgrade pip and install Python packges
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir dotenv optuna psycopg2 isort black
+# RUN pip install --no-cache-dir --upgrade pip \
+#     && pip install --no-cache-dir dotenv optuna psycopg2 isort black
 
 # # #####################################################
 # # Done installing things in container
