@@ -6,7 +6,7 @@ import optuna
 from optuna.pruners import BasePruner  # add other pruners as needed
 from optuna.samplers import BaseSampler  # add other samplers as needed
 from optuna.study import StudyDirection
-from tuning_db.tuning_studies_database import MODEL_TUNING_DB
+from docktuna.tuning_db.db_instance import get_optuna_db
 
 # Add stream handler of stdout to show the messages
 optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
@@ -23,9 +23,11 @@ def get_study(
     sampler: BaseSampler = None,
     pruner: BasePruner = None,
 ) ->  optuna.Study:
+    optuna_db = get_optuna_db()
+    
     return optuna.create_study(
         study_name=study_name,
-        storage=MODEL_TUNING_DB.storage,
+        storage=optuna_db.storage,
         load_if_exists=True,
         direction=direction,
         sampler=sampler,
@@ -35,9 +37,7 @@ def get_study(
 
 def main(study_name: str = "simple_study", n_trials: int = 3):
     study = get_study(study_name=study_name)
-    study.optimize(func=objective, n_trials=n_trials)
-    
-    
+    study.optimize(func=objective, n_trials=n_trials)    
 
 
 if __name__ == "__main__":
