@@ -6,10 +6,9 @@ import optuna
 from optuna.pruners import BasePruner  # add other pruners as needed
 from optuna.samplers import BaseSampler  # add other samplers as needed
 from optuna.study import StudyDirection
-from docktuna.tuning_db.db_instance import get_optuna_db
+from docktuna.optuna_db.db_instance import get_optuna_db
 
-# Add stream handler of stdout to show the messages
-optuna.logging.get_logger("optuna").addHandler(logging.StreamHandler(sys.stdout))
+
 
 
 def objective(trial: optuna.Trial) -> float:
@@ -36,6 +35,10 @@ def get_study(
 
 
 def main(study_name: str = "simple_study", n_trials: int = 3):
+    # Add stream handler of stdout to show the messages
+    optuna_logger = optuna.logging.get_logger("optuna")
+    optuna_logger.addHandler(logging.StreamHandler(sys.stdout))
+
     study = get_study(study_name=study_name)
     study.optimize(func=objective, n_trials=n_trials)    
 
