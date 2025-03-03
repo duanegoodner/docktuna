@@ -3,7 +3,18 @@ from docktuna.optuna_db.optuna_db import OptunaDatabase
 OPTUNA_DB = None
 
 def get_optuna_db() -> OptunaDatabase:
-    """Returns a global OptunaDatabase instance, initializing if necessary."""
+    """
+    Returns a global OptunaDatabase instance, initializing it if necessary.
+
+    If the database instance does not exist, it will be created using credentials 
+    stored in Docker secrets. If initialization fails, an exception is raised.
+
+    Returns:
+        The global OptunaDatabase instance.
+
+    Raises:
+        RuntimeError: If the database initialization fails.
+    """
     global OPTUNA_DB
     if OPTUNA_DB is None:
         OPTUNA_DB = OptunaDatabase(
@@ -18,6 +29,3 @@ def get_optuna_db() -> OptunaDatabase:
             OPTUNA_DB = None  # Reset on failure
             raise RuntimeError(f"Failed to initialize Optuna database: {e}")
     return OPTUNA_DB
-
-
-
