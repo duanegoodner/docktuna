@@ -10,9 +10,9 @@ from optuna.storages import RDBStorage
 @contextmanager
 def temporary_optuna_verbosity(logging_level: int):
     """
-    Temporarily sets Optuna's logging verbosity to the specified level 
+    Temporarily sets Optuna's logging verbosity to the specified level
     and restores the original level after execution.
-    
+
     Args:
         logging_level: Optuna logging level to temporarily set.
     """
@@ -26,7 +26,7 @@ def temporary_optuna_verbosity(logging_level: int):
 
 class OptunaDatabase:
     """
-    Handles database interactions for Optuna studies, including secure 
+    Handles database interactions for Optuna studies, including secure
     retrieval of credentials from Docker secrets and connection management.
     """
 
@@ -41,16 +41,16 @@ class OptunaDatabase:
         Initializes an OptunaDatabase instance with database connection details.
 
         Args:
-            username_secret: Secret name for the database username.
+            username: Database username.
             db_password_secret: Secret name for the database password.
-            db_name_secret: Secret name for the database name.
-            hostname_secret: Secret name for the database hostname.
+            db_name: Name of the database.
+            hostname: Database host.
         """
         self._username = username
         self._db_password_secret = db_password_secret
         self._db_name = db_name
         self._hostname = hostname
-    
+
     def _read_secret(self, secret_name: str) -> str:
         """
         Reads a secret value from the Docker secrets directory.
@@ -70,12 +70,12 @@ class OptunaDatabase:
                 return f.read().strip()
         except FileNotFoundError:
             raise Exception(f"Secret {secret_name} not found!")
-    
+
     @property
     def username(self) -> str:
         """Retrieves the database username from secrets."""
         return self._username
-    
+
     @property
     def db_name(self) -> str:
         """Retrieves the database name from secrets."""
@@ -89,7 +89,7 @@ class OptunaDatabase:
     @property
     def _db_url(self) -> str:
         """
-        Constructs a secure database connection URL dynamically 
+        Constructs a secure database connection URL dynamically
         using credentials stored in Docker secrets.
 
         Returns:
@@ -100,9 +100,7 @@ class OptunaDatabase:
         db_name = self._db_name
         host = self._hostname
 
-        return (
-            f"postgresql+psycopg2://{user}:{quote(password, safe='')}@{host}/{db_name}"
-        )
+        return f"postgresql+psycopg2://{user}:{quote(password, safe='')}@{host}/{db_name}"
 
     @property
     def storage(self) -> RDBStorage:
@@ -134,7 +132,9 @@ class OptunaDatabase:
         Returns:
             True if the study exists, False otherwise.
         """
-        return study_name in {summary.study_name for summary in self.study_summaries}
+        return study_name in {
+            summary.study_name for summary in self.study_summaries
+        }
 
     def get_study_summary(self, study_name: str) -> optuna.study.StudySummary:
         """
@@ -182,7 +182,9 @@ class OptunaDatabase:
         """
         with temporary_optuna_verbosity(logging_level=optuna.logging.WARNING):
             return optuna.create_study(
-                study_name=study_name, storage=self.storage, load_if_exists=True
+                study_name=study_name,
+                storage=self.storage,
+                load_if_exists=True,
             )
 
     def get_all_studies(self) -> list[optuna.Study]:
@@ -195,9 +197,11 @@ class OptunaDatabase:
         with temporary_optuna_verbosity(logging_level=optuna.logging.WARNING):
             return [
                 self.get_study(study_name)
-                for study_name in {summary.study_name for summary in self.study_summaries}
+                for study_name in {
+                    summary.study_name for summary in self.study_summaries
+                }
             ]
-    
+
     @property
     def num_existing_studies(self) -> int:
         """
@@ -217,11 +221,13 @@ class OptunaDatabase:
             study: The study object.
 
         Returns:
-            The timestamp of the most recent trial completion, 
+            The timestamp of the most recent trial completion,
             or a default old date if no trials exist.
         """
         trial_complete_times = [
-            trial.datetime_complete for trial in study.trials if trial.datetime_complete
+            trial.datetime_complete
+            for trial in study.trials
+            if trial.datetime_complete
         ]
         return (
             max(trial_complete_times)
@@ -234,7 +240,7 @@ class OptunaDatabase:
         Retrieves the most recently updated study.
 
         Returns:
-            The study with the most recent completed trial, 
+            The study with the most recent completed trial,
             or None if no studies exist.
         """
         sorted_studies = sorted(

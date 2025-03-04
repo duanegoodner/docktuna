@@ -5,7 +5,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 from os import getenv
 
-from docktuna.optuna_db.optuna_db import OptunaDatabase, temporary_optuna_verbosity
+from docktuna.optuna_db.optuna_db import (
+    OptunaDatabase,
+    temporary_optuna_verbosity,
+)
 
 
 def simple_objective(trial: optuna.Trial) -> float:
@@ -32,7 +35,9 @@ def optuna_db():
     Returns:
         An initialized OptunaDatabase instance.
     """
-    dotenv_path = Path.home() / "project" / "docker" / "databases" / "tuning_dbs.env"
+    dotenv_path = (
+        Path.home() / "project" / "docker" / "databases" / "tuning_dbs.env"
+    )
     load_dotenv(dotenv_path=dotenv_path)
     my_db = OptunaDatabase(
         username=getenv("TUNING_DBS_USER"),

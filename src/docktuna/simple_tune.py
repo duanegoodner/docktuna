@@ -91,10 +91,16 @@ if __name__ == "__main__":
         description="Run an Optuna study to optimize a simple objective function."
     )
     parser.add_argument(
-        "--study_name", type=str, default="simple_study", help="Name of the study"
+        "--study_name",
+        type=str,
+        default="simple_study",
+        help="Name of the study",
     )
     parser.add_argument(
-        "--n_trials", type=int, default=3, help="Number of trials for optimization"
+        "--n_trials",
+        type=int,
+        default=3,
+        help="Number of trials for optimization",
     )
     args = parser.parse_args()
     main(study_name=args.study_name, n_trials=args.n_trials)
