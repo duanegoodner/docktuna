@@ -1,5 +1,9 @@
+import dotenv
 import optuna
 import pytest
+from pathlib import Path
+from dotenv import load_dotenv
+from os import getenv
 
 from docktuna.optuna_db.optuna_db import OptunaDatabase, temporary_optuna_verbosity
 
@@ -28,11 +32,13 @@ def optuna_db():
     Returns:
         An initialized OptunaDatabase instance.
     """
+    dotenv_path = Path.home() / "project" / "docker" / "databases" / "tuning_dbs.env"
+    load_dotenv(dotenv_path=dotenv_path)
     my_db = OptunaDatabase(
-        username_secret="tuning_dbs_user",
+        username=getenv("TUNING_DBS_USER"),
         db_password_secret="tuningdb_tuner_password",
-        db_name_secret="model_tuning_db_name",
-        hostname_secret="postgres_dbs_host",
+        db_name=getenv("MODEL_TUNING_DB_NAME"),
+        hostname=getenv("POSTGRES_DBS_HOST"),
     )
     my_study = my_db.get_study(study_name="test_study")
     my_study.optimize(func=simple_objective, n_trials=3)

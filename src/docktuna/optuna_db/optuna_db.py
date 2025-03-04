@@ -32,10 +32,10 @@ class OptunaDatabase:
 
     def __init__(
         self,
-        username_secret: str,
+        username: str,
         db_password_secret: str,
-        db_name_secret: str,
-        hostname_secret: str,
+        db_name: str,
+        hostname: str,
     ):
         """
         Initializes an OptunaDatabase instance with database connection details.
@@ -46,10 +46,10 @@ class OptunaDatabase:
             db_name_secret: Secret name for the database name.
             hostname_secret: Secret name for the database hostname.
         """
-        self._username_secret = username_secret
+        self._username = username
         self._db_password_secret = db_password_secret
-        self._db_name_secret = db_name_secret
-        self._hostname_secret = hostname_secret
+        self._db_name = db_name
+        self._hostname = hostname
     
     def _read_secret(self, secret_name: str) -> str:
         """
@@ -74,17 +74,17 @@ class OptunaDatabase:
     @property
     def username(self) -> str:
         """Retrieves the database username from secrets."""
-        return self._read_secret(self._username_secret)
+        return self._username
     
     @property
     def db_name(self) -> str:
         """Retrieves the database name from secrets."""
-        return self._read_secret(self._db_name_secret)
+        return self._db_name
 
     @property
     def hostname(self) -> str:
         """Retrieves the database hostname from secrets."""
-        return self._read_secret(self._hostname_secret)
+        return self._hostname
 
     @property
     def _db_url(self) -> str:
@@ -95,10 +95,10 @@ class OptunaDatabase:
         Returns:
             The formatted database connection URL.
         """
-        user = self._read_secret(self._username_secret)
+        user = self._username
         password = self._read_secret(self._db_password_secret)
-        db_name = self._read_secret(self._db_name_secret)
-        host = self._read_secret(self._hostname_secret)
+        db_name = self._db_name
+        host = self._hostname
 
         return (
             f"postgresql+psycopg2://{user}:{quote(password, safe='')}@{host}/{db_name}"
