@@ -23,15 +23,15 @@ def get_optuna_db() -> OptunaDatabase:
     global OPTUNA_DB
     if OPTUNA_DB is None:
         dotenv_path = (
-            Path.home() / "project" / "docker" / "databases" / "tuning_dbs.env"
+            Path.home() / "project" / "docker" / "databases" / "optuna_db.env"
         )
         load_dotenv(dotenv_path=dotenv_path)
 
         OPTUNA_DB = OptunaDatabase(
-            username=getenv("TUNING_DBS_USER"),
+            username=getenv("OPTUNA_DB_USER"),
             db_password_secret="optuna_db_user_password",
-            db_name=getenv("MODEL_TUNING_DB_NAME"),
-            hostname=getenv("POSTGRES_DBS_HOST"),
+            db_name=getenv("OPTUNA_DB_NAME"),
+            hostname=getenv("OPTUNA_DB_HOST"),
         )
         try:
             _ = OPTUNA_DB.storage  # Force initialization to catch errors early

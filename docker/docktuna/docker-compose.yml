@@ -46,7 +46,7 @@ services:
 
   postgres_for_optuna:
     env_file:
-      - ../databases/tuning_dbs.env
+      - ../databases/optuna_db.env
     image: postgres
     container_name: postgres_for_optuna
     volumes:

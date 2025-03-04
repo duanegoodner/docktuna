@@ -37,7 +37,7 @@ EOSQL
 
 }
 
-create_user "$TUNING_DBS_USER" "$TUNING_DBS_PASSWORD_FILE"
-create_database "$MODEL_TUNING_DB_NAME"
-grant_privileges "$MODEL_TUNING_DB_NAME" "$TUNING_DBS_USER"
+create_user "$OPTUNA_DB_USER" "$OPTUNA_DB_PASSWORD_FILE"
+create_database "$OPTUNA_DB_NAME"
+grant_privileges "$OPTUNA_DB_NAME" "$OPTUNA_DB_USER"
 
