@@ -1,8 +1,8 @@
 secrets:
   tuningdb_postgres_password:
     file: ../secrets/tuningdb_postgres_password.txt
-  tuningdb_tuner_password:
-    file: ../secrets/tuningdb_tuner_password.txt
+  optuna_dbuser_password:
+    file: ../secrets/optuna_dbuser_password.txt
   
 
 services:
@@ -18,7 +18,7 @@ services:
               count: 1
               capabilities: [ gpu ]
     secrets:
-      - tuningdb_tuner_password
+      - optuna_dbuser_password
     build:
       context: ../
       dockerfile: ./app/Dockerfile
@@ -44,22 +44,22 @@ services:
     stdin_open: true
     tty: true
 
-  postgres_optuna_x:
+  postgres_for_optuna:
     env_file:
       - ../databases/tuning_dbs.env
     image: postgres
-    container_name: postgres_optuna_x
+    container_name: postgres_for_optuna
     volumes:
-      - optuna_db_x:/var/lib/postgresql/data
+      - optuna_postgres_volume:/var/lib/postgresql/data
       - ../pg_init_scripts:/docker-entrypoint-initdb.d
     ports:
       - 5556:5432
     secrets:
       - tuningdb_postgres_password
-      - tuningdb_tuner_password
+      - optuna_dbuser_password
 
 volumes:
-  optuna_db_x:
+  optuna_postgres_volume:
 
 
 
