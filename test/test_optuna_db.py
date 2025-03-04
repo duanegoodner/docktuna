@@ -40,10 +40,10 @@ def optuna_db():
     )
     load_dotenv(dotenv_path=dotenv_path)
     my_db = OptunaDatabase(
-        username=getenv("TUNING_DBS_USER"),
+        username=getenv("OPTUNA_DB_USER"),
         db_password_secret="optuna_db_user_password",
-        db_name=getenv("MODEL_TUNING_DB_NAME"),
-        hostname=getenv("POSTGRES_DBS_HOST"),
+        db_name=getenv("OPTUNA_DB_NAME"),
+        hostname=getenv("OPTUNA_DB_HOST"),
     )
     my_study = my_db.get_study(study_name="test_study")
     my_study.optimize(func=simple_objective, n_trials=3)
