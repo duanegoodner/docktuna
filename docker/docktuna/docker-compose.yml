@@ -21,7 +21,7 @@ services:
       - optuna_db_user_password
     build:
       context: ../
-      dockerfile: ./app/Dockerfile
+      dockerfile: ./docktuna/Dockerfile
       args:
         - PRIMARY_UID=${UID}
         - PRIMARY_GID=${GID}
