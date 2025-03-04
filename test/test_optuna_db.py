@@ -41,7 +41,7 @@ def optuna_db():
     load_dotenv(dotenv_path=dotenv_path)
     my_db = OptunaDatabase(
         username=getenv("TUNING_DBS_USER"),
-        db_password_secret="tuningdb_tuner_password",
+        db_password_secret="optuna_db_user_password",
         db_name=getenv("MODEL_TUNING_DB_NAME"),
         hostname=getenv("POSTGRES_DBS_HOST"),
     )

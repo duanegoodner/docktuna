@@ -1,15 +1,15 @@
 secrets:
-  tuningdb_postgres_password:
-    file: ../secrets/tuningdb_postgres_password.txt
-  tuningdb_tuner_password:
-    file: ../secrets/tuningdb_tuner_password.txt
+  optuna_db_postgres_password:
+    file: ../secrets/optuna_db_postgres_password.txt
+  optuna_db_user_password:
+    file: ../secrets/optuna_db_user_password.txt
   
 
 services:
-  lstm_aa_app_x:
+  my_optuna_app:
     env_file:
       - .env
-    image: lstm_aa_app_x
+    image: my_optuna_app
     deploy:
       resources:
         reservations:
@@ -18,16 +18,16 @@ services:
               count: 1
               capabilities: [ gpu ]
     secrets:
-      - tuningdb_tuner_password
+      - optuna_db_user_password
     build:
       context: ../
-      dockerfile: ./app/Dockerfile
+      dockerfile: ./docktuna/Dockerfile
       args:
         - PRIMARY_UID=${UID}
         - PRIMARY_GID=${GID}
         - PRIMARY_USER=gen_user
 
-    container_name: lstm_aa_app_x
+    container_name: my_optuna_app
     entrypoint:
       [
         "/bin/bash",
@@ -44,22 +44,22 @@ services:
     stdin_open: true
     tty: true
 
-  postgres_optuna_x:
+  postgres_for_optuna:
     env_file:
       - ../databases/tuning_dbs.env
     image: postgres
-    container_name: postgres_optuna_x
+    container_name: postgres_for_optuna
     volumes:
-      - optuna_db_x:/var/lib/postgresql/data
+      - optuna_postgres_volume:/var/lib/postgresql/data
       - ../pg_init_scripts:/docker-entrypoint-initdb.d
     ports:
       - 5556:5432
     secrets:
-      - tuningdb_postgres_password
-      - tuningdb_tuner_password
+      - optuna_db_postgres_password
+      - optuna_db_user_password
 
 volumes:
-  optuna_db_x:
+  optuna_postgres_volume:
 
 
 

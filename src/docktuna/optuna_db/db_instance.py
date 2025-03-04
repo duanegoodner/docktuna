@@ -29,7 +29,7 @@ def get_optuna_db() -> OptunaDatabase:
 
         OPTUNA_DB = OptunaDatabase(
             username=getenv("TUNING_DBS_USER"),
-            db_password_secret="tuningdb_tuner_password",
+            db_password_secret="optuna_db_user_password",
             db_name=getenv("MODEL_TUNING_DB_NAME"),
             hostname=getenv("POSTGRES_DBS_HOST"),
         )
