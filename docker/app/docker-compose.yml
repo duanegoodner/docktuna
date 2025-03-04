@@ -6,10 +6,10 @@ secrets:
   
 
 services:
-  lstm_aa_app_x:
+  my_optuna_app:
     env_file:
       - .env
-    image: lstm_aa_app_x
+    image: my_optuna_app
     deploy:
       resources:
         reservations:
@@ -27,7 +27,7 @@ services:
         - PRIMARY_GID=${GID}
         - PRIMARY_USER=gen_user
 
-    container_name: lstm_aa_app_x
+    container_name: my_optuna_app
     entrypoint:
       [
         "/bin/bash",
