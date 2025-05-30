@@ -23,8 +23,8 @@ services:
       context: ../
       dockerfile: ./docktuna/Dockerfile
       args:
-        - PRIMARY_UID=${UID}
-        - PRIMARY_GID=${GID}
+        - PRIMARY_UID=${HOST_UID}
+        - PRIMARY_GID=${HOST_GID}
         - PRIMARY_USER=gen_user
 
     container_name: my_optuna_app

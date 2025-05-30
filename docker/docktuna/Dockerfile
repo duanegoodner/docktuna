@@ -10,6 +10,9 @@ COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
 RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
     && sudo rm -rf /tmp/create_sudo_user
 
+RUN cat /etc/passwd
+
+
 USER ${PRIMARY_USER}
 ARG BUILD_DIR=/home/${PRIMARY_USER}/docker_build
 WORKDIR ${BUILD_DIR}
@@ -29,6 +32,13 @@ COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
 RUN ${BUILD_DIR}/zsh_setup/main.sh ${PRIMARY_USER} \
     && sudo rm -rf ${BUILD_DIR}/*
 
+RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
+    && wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/${PRIMARY_USER}/miniconda3/miniconda.sh \
+    && bash /home/${PRIMARY_USER}/miniconda3/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 \
+    && rm /home/${PRIMARY_USER}/miniconda3/miniconda.sh \
+    && source ~/miniconda3/bin/activate \
+    && conda init --all
+
 # Install Poetry (as PRIMARY_USER)
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
@@ -39,14 +49,15 @@ ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
 RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
     echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
 
+# Create Conda env
+COPY environment.yml /tmp/environment.yml
+RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -f /tmp/environment.yml \
+    && sudo rm /tmp/environment.yml
 
-# Upgrade pip and install Python packges
-# RUN pip install --no-cache-dir --upgrade pip \
-#     && pip install --no-cache-dir dotenv optuna psycopg2 isort black
-
-# # #####################################################
-# # Done installing things in container
-# # #####################################################
+# Create Poetry env (without local package install)
+COPY pyproject.toml poetry.lock* /tmp/poetry_env/
+WORKDIR /tmp/poetry_env
+RUN poetry install --no-root && sudo rm -rf /tmp/poetry_env
 
 RUN sudo mkdir /home/${PRIMARY_USER}/project
 WORKDIR /home/${PRIMARY_USER}/project

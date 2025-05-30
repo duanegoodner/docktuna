@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Run as: root
 
 create_sudo_user() {
