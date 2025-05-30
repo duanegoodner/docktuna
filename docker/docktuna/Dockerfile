@@ -8,19 +8,8 @@ ENV CONDA_ENV_NAME=${CONDA_ENV_NAME}
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
-COPY ${COMPONENTS}/create_sudo_user /tmp/create_sudo_user
-RUN /tmp/create_sudo_user/main.sh ${PRIMARY_USER} ${PRIMARY_UID} ${PRIMARY_GID}\
-    && sudo rm -rf /tmp/create_sudo_user
-
-RUN cat /etc/passwd
-
-
-USER ${PRIMARY_USER}
-ARG BUILD_DIR=/home/${PRIMARY_USER}/docker_build
-WORKDIR ${BUILD_DIR}
-
-RUN sudo apt-get update && \
-    sudo apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     git \
@@ -28,12 +17,53 @@ RUN sudo apt-get update && \
     wget \
     zsh \
     nano \
-    && sudo rm -rf /var/lib/apt/lists/*
+    fontconfig \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY ${COMPONENTS}/zsh_setup ${BUILD_DIR}/zsh_setup
-RUN ${BUILD_DIR}/zsh_setup/main.sh ${PRIMARY_USER} \
-    && sudo rm -rf ${BUILD_DIR}/*
+RUN mkdir -p /usr/local/entrypoints
+COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
 
+
+# Create group and user without sudo
+RUN groupadd -g ${PRIMARY_GID} ${PRIMARY_USER} && \
+    useradd -m -s /bin/bash -u ${PRIMARY_UID} -g ${PRIMARY_GID} ${PRIMARY_USER}
+
+# Create project workspace owned by dev user
+RUN mkdir -p /home/${PRIMARY_USER}/project && \
+    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/project
+
+# Switch to PRIMARY_USER
+USER ${PRIMARY_USER}
+WORKDIR /home/${PRIMARY_USER}/project
+
+
+# Install Oh My Zsh + plugins + theme 
+RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh && \
+    cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc && \
+    git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions && \
+    git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions && \
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
+    git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search && \
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
+
+# Fonts: install MesloLGS Nerd Font (user-local)
+RUN mkdir -p ~/.local/share/fonts && \
+wget --show-progress --user-agent="Mozilla" \
+    https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip \
+    -O /tmp/Meslo.zip && \
+unzip -j /tmp/Meslo.zip '*.ttf' -d ~/.local/share/fonts && \
+fc-cache -fv && \
+rm /tmp/Meslo.zip
+
+# Copy final Zsh and p10k configs (as root)
+USER root
+COPY image_resources/components/zsh_setup/.zshrc /home/${PRIMARY_USER}/.zshrc
+COPY image_resources/components/zsh_setup/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
+RUN chown ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.zshrc /home/${PRIMARY_USER}/.p10k.zsh
+USER ${PRIMARY_USER}
+
+# Install Miniconda under PRIMARY_USER home
 RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
     && wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/${PRIMARY_USER}/miniconda3/miniconda.sh \
     && bash /home/${PRIMARY_USER}/miniconda3/miniconda.sh -b -u -p /home/${PRIMARY_USER}/miniconda3 \
@@ -58,16 +88,16 @@ ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
 RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
     echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
 
-
-
 # Create Poetry env (without local package install)
 COPY pyproject.toml poetry.lock* /tmp/poetry_env/
 WORKDIR /tmp/poetry_env
-RUN poetry install --no-root && sudo rm -rf /tmp/poetry_env
+RUN poetry install --no-root
 
-RUN sudo mkdir /home/${PRIMARY_USER}/project
+# Change to root to remove directory under /tmp
+USER root
+RUN rm -rf /tmp/poetry_env
+USER ${PRIMARY_USER}
+
+# RUN sudo mkdir /home/${PRIMARY_USER}/project
 WORKDIR /home/${PRIMARY_USER}/project
-RUN sudo rm -rf ${BUILD_DIR}
 
-RUN sudo mkdir -p /usr/local/entrypoints
-COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
