@@ -3,6 +3,8 @@ ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
 ARG COMPONENTS=./image_resources/components
+ARG CONDA_ENV_NAME
+ENV CONDA_ENV_NAME=${CONDA_ENV_NAME}
 
 SHELL [ "/bin/bash", "--login", "-c" ]
 
@@ -39,6 +41,13 @@ RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
     && source ~/miniconda3/bin/activate \
     && conda init --all
 
+# Create Conda env
+COPY environment.yml /tmp/environment.yml
+RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n ${CONDA_ENV_NAME} -f /tmp/environment.yml
+
+RUN echo "conda activate ${CONDA_ENV_NAME}" >> ~/.zshrc && \
+    echo "conda activate ${CONDA_ENV_NAME}" >> ~/.bashrc
+
 # Install Poetry (as PRIMARY_USER)
 RUN curl -sSL https://install.python-poetry.org | python3 -
 
@@ -49,10 +58,7 @@ ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
 RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
     echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
 
-# Create Conda env
-COPY environment.yml /tmp/environment.yml
-RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -f /tmp/environment.yml \
-    && sudo rm /tmp/environment.yml
+
 
 # Create Poetry env (without local package install)
 COPY pyproject.toml poetry.lock* /tmp/poetry_env/

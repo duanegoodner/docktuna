@@ -13,7 +13,7 @@ cp "$PROJECT_ROOT/environment.yml" "$DOCKER_ROOT/"
 echo "==> Building Docker image with Docker Compose..."
 HOST_UID=$(id -u)
 HOST_GID=$(id -g)
-HOST_UID=$HOST_UID HOST_GID=$HOST_GID docker compose -f "$DOCKER_ROOT/docktuna/docker-compose.yml" build --no-cache
+HOST_UID=$HOST_UID HOST_GID=$HOST_GID docker compose -f "$DOCKER_ROOT/docktuna/docker-compose.yml" build
 
 echo "==> Cleaning up temporary files..."
 rm -f "$DOCKER_ROOT/pyproject.toml" "$DOCKER_ROOT/poetry.lock" "$DOCKER_ROOT/environment.yml"
