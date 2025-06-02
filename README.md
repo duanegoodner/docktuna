@@ -16,7 +16,7 @@ Docktuna is a template project for running the hyperparameter tuning framework [
 
 ## Getting Started
 
-### Build the `my_optuna_app` Image
+### Build the `optuna_app` Image
 
 ```
 git clone https://github.com/duanegoodner/docktuna
@@ -25,9 +25,9 @@ UID=${UID} GID=${GID} docker compose build
 ```
 Output should include:
 ```
-✔ my_optuna_app  Built
+✔ optuna_app  Built
 ```
-Key things to note about the `my_optuna_app` image:
+Key things to note about the `optuna_app` image:
 - Based on a Debian Slim image
 - Contains a **sudo-privileged non-root user**, `gen_user` with `UID` and `GID` values that match the `UID` and `GID` of the local user building the image.
 - Poetry and Miniconda are installed under the `gen_user` home directory/
@@ -43,16 +43,16 @@ Expected Output:
  ✔ Network docktuna_default                  Created                         0.2s 
  ✔ Volume "docktuna_optuna_postgres_volume"  Created                         0.0s 
  ✔ Container postgres_for_optuna             Started                         0.5s 
- ✔ Container my_optuna_app                   Started                         0.6s 
+ ✔ Container optuna_app                   Started                         0.6s 
 ```
-The `my_optuna_app` container is based on our image of the same name. `postgres_for_optuna` is based on a PostgreSQL image and has Docker volume `docktuna_optuna_postgres_volume` mapped to its storage.
+The `optuna_app` container is based on our image of the same name. `postgres_for_optuna` is based on a PostgreSQL image and has Docker volume `docktuna_optuna_postgres_volume` mapped to its storage.
 
-### Enter `my_optuna_app` Container
+### Enter `optuna_app` Container
 
 ```
-docker exec -it my_optuna_app /bin/zsh
+docker exec -it optuna_app /bin/zsh
 ```
-This will take you a `zsh` prompt in working directory `/home/gen_user/project/` inside the `my_optuna_app` container. This container path is mapped to the local project root, so the output of `ls` should match the contents of your local repo root director:
+This will take you a `zsh` prompt in working directory `/home/gen_user/project/` inside the `optuna_app` container. This container path is mapped to the local project root, so the output of `ls` should match the contents of your local repo root director:
 ```
 LICENSE  README.md  coverage.xml  docker  environment.yml  poetry.lock  pyproject.toml  src  test
 ```
