@@ -12,9 +12,8 @@ docker/secrets/*
 !docker/secrets/.gitkeep
 
 
-docker/app/.env
-docker/app/postgres_password.txt
-docker/app/tuner_password.txt
+
+docker/.env
 
 logs/*
 !logs/.gitkeep
