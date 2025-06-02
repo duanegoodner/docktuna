@@ -20,8 +20,8 @@ services:
     secrets:
       - optuna_db_user_password
     build:
-      context: ../
-      dockerfile: ./docktuna/Dockerfile
+      context: ../../
+      dockerfile: ./docker/docktuna/Dockerfile
       args:
         - PRIMARY_UID=${HOST_UID}
         - PRIMARY_GID=${HOST_GID}

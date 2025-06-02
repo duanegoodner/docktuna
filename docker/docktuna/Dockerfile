@@ -3,7 +3,6 @@ FROM python:3.12.10-slim-bookworm
 ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
-ARG COMPONENTS=./image_resources/components
 ARG CONDA_ENV_NAME
 ENV CONDA_ENV_NAME=${CONDA_ENV_NAME}
 
@@ -24,7 +23,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/local/entrypoints
-COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
+COPY ./docker/image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
 
 
 # Create group and user without sudo
@@ -56,8 +55,8 @@ RUN mkdir -p ~/.local/share/fonts && \
 
 # Copy final Zsh and p10k configs (as root)
 USER root
-COPY image_resources/components/zsh_setup/.zshrc /home/${PRIMARY_USER}/.zshrc
-COPY image_resources/components/zsh_setup/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
+COPY ./docker/image_resources/.zshrc /home/${PRIMARY_USER}/.zshrc
+COPY ./docker/image_resources/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
 RUN chown ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.zshrc /home/${PRIMARY_USER}/.p10k.zsh
 USER ${PRIMARY_USER}
 
@@ -70,31 +69,16 @@ RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
     && conda init --all
 
 # Create Conda env
-COPY environment.yml /tmp/environment.yml
+COPY ../../environment.yml /tmp/environment.yml
 RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n ${CONDA_ENV_NAME} -f /tmp/environment.yml
 RUN echo "conda activate ${CONDA_ENV_NAME}" >> ~/.zshrc && \
     echo "conda activate ${CONDA_ENV_NAME}" >> ~/.bashrc
 
 # Use Poetry from inside the activated Conda environment
-COPY pyproject.toml poetry.lock* /tmp/poetry_env/
+COPY ../../pyproject.toml ../../poetry.lock* /tmp/poetry_env/
 WORKDIR /tmp/poetry_env
 
 RUN /bin/bash -c "source /home/${PRIMARY_USER}/miniconda3/bin/activate ${CONDA_ENV_NAME} && poetry install --no-root"
-
-# Install Poetry (as PRIMARY_USER)
-# RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Ensure Poetry is in PRIMARY_USER's PATH
-# ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
-
-# Persist Poetry's path in user's profile for interactive sessions
-# RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
-#     echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
-
-# Create Poetry env (without local package install)
-# COPY pyproject.toml poetry.lock* /tmp/poetry_env/
-# WORKDIR /tmp/poetry_env
-# RUN poetry install --no-root
 
 # Change to root to remove directory under /tmp
 USER root
