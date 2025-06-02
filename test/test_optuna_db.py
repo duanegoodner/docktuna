@@ -36,7 +36,7 @@ def optuna_db():
         An initialized OptunaDatabase instance.
     """
     dotenv_path = (
-        Path.home() / "project" / "docker" / "databases" / "optuna_db.env"
+        Path.home() / "project" / "docker" / "optuna_db" / "optuna_db.env"
     )
     load_dotenv(dotenv_path=dotenv_path)
     my_db = OptunaDatabase(

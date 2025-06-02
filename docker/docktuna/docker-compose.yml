@@ -23,8 +23,8 @@ services:
       context: ../../
       dockerfile: ./docker/docktuna/Dockerfile
       args:
-        - PRIMARY_UID=${HOST_UID}
-        - PRIMARY_GID=${HOST_GID}
+        - PRIMARY_UID=${UID}
+        - PRIMARY_GID=${GID}
         - PRIMARY_USER=gen_user
         - CONDA_ENV_NAME=${CONDA_ENV_NAME}
 
@@ -47,7 +47,7 @@ services:
 
   postgres_for_optuna:
     env_file:
-      - ../databases/optuna_db.env
+      - ../optuna_db/optuna_db.env
     image: postgres
     container_name: postgres_for_optuna
     volumes:
