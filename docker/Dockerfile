@@ -23,7 +23,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /usr/local/entrypoints
-COPY ./docker/image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
+COPY ./docker/optuna_app/entrypoint_simple_persistence.sh /usr/local/entrypoints
 
 
 # Create group and user without sudo
@@ -55,8 +55,8 @@ RUN mkdir -p ~/.local/share/fonts && \
 
 # Copy final Zsh and p10k configs (as root)
 USER root
-COPY ./docker/image_resources/.zshrc /home/${PRIMARY_USER}/.zshrc
-COPY ./docker/image_resources/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
+COPY ./docker/optuna_app/.zshrc /home/${PRIMARY_USER}/.zshrc
+COPY ./docker/optuna_app/.p10k.zsh /home/${PRIMARY_USER}/.p10k.zsh
 RUN chown ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/.zshrc /home/${PRIMARY_USER}/.p10k.zsh
 USER ${PRIMARY_USER}
 

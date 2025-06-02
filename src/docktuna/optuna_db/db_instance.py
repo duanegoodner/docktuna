@@ -23,7 +23,7 @@ def get_optuna_db() -> OptunaDatabase:
     global OPTUNA_DB
     if OPTUNA_DB is None:
         dotenv_path = (
-            Path.home() / "project" / "docker" / "databases" / "optuna_db.env"
+            Path.home() / "project" / "docker" / "optuna_db" / "optuna_db.env"
         )
         load_dotenv(dotenv_path=dotenv_path)
 

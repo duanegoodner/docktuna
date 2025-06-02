@@ -1,15 +1,15 @@
 secrets:
   optuna_db_postgres_password:
-    file: ../secrets/optuna_db_postgres_password.txt
+    file: ./secrets/optuna_db_postgres_password.txt
   optuna_db_user_password:
-    file: ../secrets/optuna_db_user_password.txt
+    file: ./secrets/optuna_db_user_password.txt
   
 
 services:
-  my_optuna_app:
+  optuna_app:
     env_file:
       - .env
-    image: my_optuna_app
+    image: optuna_app
     deploy:
       resources:
         reservations:
@@ -20,15 +20,15 @@ services:
     secrets:
       - optuna_db_user_password
     build:
-      context: ../../
-      dockerfile: ./docker/docktuna/Dockerfile
+      context: ../
+      dockerfile: ./docker/Dockerfile
       args:
-        - PRIMARY_UID=${HOST_UID}
-        - PRIMARY_GID=${HOST_GID}
+        - PRIMARY_UID=${UID}
+        - PRIMARY_GID=${GID}
         - PRIMARY_USER=gen_user
         - CONDA_ENV_NAME=${CONDA_ENV_NAME}
 
-    container_name: my_optuna_app
+    container_name: optuna_app
     entrypoint:
       [
         "/bin/bash",
@@ -47,12 +47,12 @@ services:
 
   postgres_for_optuna:
     env_file:
-      - ../databases/optuna_db.env
+      - ./optuna_db/optuna_db.env
     image: postgres
     container_name: postgres_for_optuna
     volumes:
       - optuna_postgres_volume:/var/lib/postgresql/data
-      - ../pg_init_scripts:/docker-entrypoint-initdb.d
+      - ./optuna_db/pg_init_scripts:/docker-entrypoint-initdb.d
     ports:
       - 5556:5432
     secrets:
