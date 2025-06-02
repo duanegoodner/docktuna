@@ -1,0 +1,15 @@
+site_name: Docktuna Docs
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src"]
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true

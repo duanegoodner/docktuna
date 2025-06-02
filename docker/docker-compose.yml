@@ -39,7 +39,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
 
     ports:
-      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:8000:8000"
 
     init: true
     stdin_open: true
