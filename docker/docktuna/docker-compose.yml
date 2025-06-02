@@ -52,7 +52,7 @@ services:
     container_name: postgres_for_optuna
     volumes:
       - optuna_postgres_volume:/var/lib/postgresql/data
-      - ../pg_init_scripts:/docker-entrypoint-initdb.d
+      - ../optuna_db/pg_init_scripts:/docker-entrypoint-initdb.d
     ports:
       - 5556:5432
     secrets:
