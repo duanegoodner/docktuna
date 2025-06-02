@@ -1,4 +1,5 @@
-FROM python:3.11.11-slim-bookworm
+FROM python:3.12.10-slim-bookworm
+           
 ARG PRIMARY_UID
 ARG PRIMARY_GID
 ARG PRIMARY_USER
@@ -11,6 +12,7 @@ SHELL [ "/bin/bash", "--login", "-c" ]
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
+    ca-certificates \
     libpq-dev \
     git \
     curl \
@@ -29,14 +31,10 @@ COPY ./image_resources/entrypoint_simple_persistence.sh /usr/local/entrypoints
 RUN groupadd -g ${PRIMARY_GID} ${PRIMARY_USER} && \
     useradd -m -s /bin/bash -u ${PRIMARY_UID} -g ${PRIMARY_GID} ${PRIMARY_USER}
 
-# Create project workspace owned by dev user
-RUN mkdir -p /home/${PRIMARY_USER}/project && \
-    chown -R ${PRIMARY_USER}:${PRIMARY_GID} /home/${PRIMARY_USER}/project
-
 # Switch to PRIMARY_USER
 USER ${PRIMARY_USER}
+RUN mkdir -p /home/${PRIMARY_USER}/project
 WORKDIR /home/${PRIMARY_USER}/project
-
 
 # Install Oh My Zsh + plugins + theme 
 RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh && \
@@ -49,12 +47,12 @@ RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh && \
 
 # Fonts: install MesloLGS Nerd Font (user-local)
 RUN mkdir -p ~/.local/share/fonts && \
-wget --show-progress --user-agent="Mozilla" \
+    wget --show-progress --user-agent="Mozilla" \
     https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip \
     -O /tmp/Meslo.zip && \
-unzip -j /tmp/Meslo.zip '*.ttf' -d ~/.local/share/fonts && \
-fc-cache -fv && \
-rm /tmp/Meslo.zip
+    unzip -j /tmp/Meslo.zip '*.ttf' -d ~/.local/share/fonts && \
+    fc-cache -fv && \
+    rm /tmp/Meslo.zip
 
 # Copy final Zsh and p10k configs (as root)
 USER root
@@ -74,24 +72,29 @@ RUN mkdir -p /home/${PRIMARY_USER}/miniconda3 \
 # Create Conda env
 COPY environment.yml /tmp/environment.yml
 RUN /home/${PRIMARY_USER}/miniconda3/bin/conda env create -n ${CONDA_ENV_NAME} -f /tmp/environment.yml
-
 RUN echo "conda activate ${CONDA_ENV_NAME}" >> ~/.zshrc && \
     echo "conda activate ${CONDA_ENV_NAME}" >> ~/.bashrc
 
-# Install Poetry (as PRIMARY_USER)
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Ensure Poetry is in PRIMARY_USER's PATH
-ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
-
-# Persist Poetry's path in user's profile for interactive sessions
-RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
-    echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
-
-# Create Poetry env (without local package install)
+# Use Poetry from inside the activated Conda environment
 COPY pyproject.toml poetry.lock* /tmp/poetry_env/
 WORKDIR /tmp/poetry_env
-RUN poetry install --no-root
+
+RUN /bin/bash -c "source /home/${PRIMARY_USER}/miniconda3/bin/activate ${CONDA_ENV_NAME} && poetry install --no-root"
+
+# Install Poetry (as PRIMARY_USER)
+# RUN curl -sSL https://install.python-poetry.org | python3 -
+
+# Ensure Poetry is in PRIMARY_USER's PATH
+# ENV PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"
+
+# Persist Poetry's path in user's profile for interactive sessions
+# RUN echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.bashrc && \
+#     echo 'export PATH="/home/${PRIMARY_USER}/.local/bin:$PATH"' >> /home/${PRIMARY_USER}/.profile
+
+# Create Poetry env (without local package install)
+# COPY pyproject.toml poetry.lock* /tmp/poetry_env/
+# WORKDIR /tmp/poetry_env
+# RUN poetry install --no-root
 
 # Change to root to remove directory under /tmp
 USER root
