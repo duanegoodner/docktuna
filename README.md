@@ -4,24 +4,24 @@ A fully containerized Optuna RDB template
 
 ## Description
 
-Docktuna is a template project for running the hyperparameter tuning framework [Optuna](https://github.com/optuna/optuna) with an RDB backend in a fully containerized Docker environment. It provides a clean development environment using Conda and Poetry, GPU support, secrets management, and PostgreSQL integration.
+Docktuna is a template project for running the hyperparameter tuning framework [Optuna](https://github.com/optuna/optuna) with an RDB backend in a fully containerized Docker environment.  It provides a clean and reproducible Python development environment using Conda and Poetry, with support for GPU-accelerated Optuna trials.
+
+The setup includes a pre-configured PostgreSQL database for Optuna RDB storage, Docker secrets for secure credential management, and entrypoint scripts that automatically initialize the database. The project also includes a testing framework powered by `pytest`, and is designed to require no local Python or PostgreSQL installation — just Docker (and NVIDIA support if using GPUs).
 
 ## 📚 API Documentation
 
-[View Docktuna API Docs](https://duanegoodner.github.io/docktuna/)
+The Docktuna API documentation is available at: [Docktuna API Docs](https://duanegoodner.github.io/docktuna/). This documentation focuses on the `optuna_db` module and related utilities for managing Optuna studies with a PostgreSQL backend.
 
-This documentation focuses on the `optuna_db` module and related utilities for managing Optuna studies with a PostgreSQL backend.
+> [!NOTE]
+> For general project documentation, just keep reading this README — that’s where everything else lives for now.
 
-
-## Features
-- 🐳 Fully Containerized - Everything runs inside Docker.
-- 🏗 Pre-configured PostgreSQL - Ready to use with Optuna RDB storage.
-- 🔒 Secure Secrets Management - Uses Docker secrets for credentials.
-- 🛠 Testing Framework - Includes pytest for automated testing.
-- 📦 Poetry Dependency Management - Clean and reproducible environment.
-- 🏎 Optimized Performance - Supports NVIDIA GPU acceleration for Optuna trials.
 
 ## Getting Started
+
+### Requirements
+- Docker
+- Nvidia GPU with drivers supporting CUDA 12.2+ (older versions will likely work but have not been tested)
+- [Nvidia Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 
 ### Clone the Repo
 
