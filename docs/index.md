@@ -7,3 +7,4 @@
 ## API Reference
 
 Use the navigation bar to browse automatically generated documentation for the `docktuna.optuna_db` module.
+

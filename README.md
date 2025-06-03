@@ -23,7 +23,6 @@ This documentation focuses on the `optuna_db` module and related utilities for m
 
 ## Getting Started
 
-
 ### Clone the Repo
 
 ```shell
@@ -56,6 +55,7 @@ echo "your_optuna_user_password" > ./docktuna/docker/secrets/optuna_db_user_pass
 ```
 
 File permissions must allow the Docker daemon to read them (often requires group-readable, e.g., `chmod 640`).
+
 
 
 ### Build the `optuna_app` Image
