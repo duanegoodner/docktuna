@@ -4,7 +4,14 @@ A fully containerized Optuna RDB template
 
 ## Description
 
-Docktuna is a template project for running the hyperparameter tuning framework [Optuna](https://github.com/optuna/optuna) with an RDB backend in a fully containerized Docker environment. 
+Docktuna is a template project for running the hyperparameter tuning framework [Optuna](https://github.com/optuna/optuna) with an RDB backend in a fully containerized Docker environment. It provides a clean development environment using Conda and Poetry, GPU support, secrets management, and PostgreSQL integration.
+
+## 📚 API Documentation
+
+[View Docktuna API Docs](https://duanegoodner.github.io/docktuna/)
+
+This documentation focuses on the `optuna_db` module and related utilities for managing Optuna studies with a PostgreSQL backend.
+
 
 ## Features
 - 🐳 Fully Containerized - Everything runs inside Docker.
@@ -17,24 +24,52 @@ Docktuna is a template project for running the hyperparameter tuning framework [
 ## Getting Started
 
 
+### Clone the Repo
+
+```shell
+git clone https://github.com/duanegoodner/docktuna
+```
+
+### Create Env and Password Files
+
+#### Docker `.env` File
+
+```shell
+cp ./docktuna/docker/.env.example ./docktuna/docker/.env
+```
+Update this line in `.env` to match your local repo path:
+```
+LOCAL_PROJECT_ROOT=/absolute/path/to/docktuna
+```
+Replace `/absolute/path/to/docktuna` with your local path to the `docktuna` repo.
+
+
+#### Docker Secrets Directory
+Create password files inside the secrets folder:
+
+```
+mkdir -p ./docktuna/docker/secrets
+
+# Example passwords (you choose actual values)
+echo "your_postgres_password" > ./docktuna/docker/secrets/optuna_db_postgres_password.txt
+echo "your_optuna_user_password" > ./docktuna/docker/secrets/optuna_db_user_password.txt
+```
+
+File permissions must allow the Docker daemon to read them (often requires group-readable, e.g., `chmod 640`).
+
 
 ### Build the `optuna_app` Image
 
 ```
-git clone https://github.com/duanegoodner/docktuna
 cd docktuna/docker/docktuna
 UID=${UID} GID=${GID} docker compose build
 ```
-Output should include:
+Expected output includes:
 ```
 ✔ optuna_app  Built
 ```
-Key things to note about the `optuna_app` image:
-- Based on a Debian Slim image
-- Contains a **sudo-privileged non-root user**, `gen_user` with `UID` and `GID` values that match the `UID` and `GID` of the local user building the image.
-- Poetry and Miniconda are installed under the `gen_user` home directory/
 
-### Use `docker compose` to Start Containers
+### Launch Services
 ```
 UID=${UID} GID=${GID} docker compose up -d
 ```
@@ -45,42 +80,49 @@ Expected Output:
  ✔ Network docktuna_default                  Created                         0.2s 
  ✔ Volume "docktuna_optuna_postgres_volume"  Created                         0.0s 
  ✔ Container postgres_for_optuna             Started                         0.5s 
- ✔ Container optuna_app                   Started                         0.6s 
+ ✔ Container optuna_app                      Started                         0.6s 
 ```
-The `optuna_app` container is based on our image of the same name. `postgres_for_optuna` is based on a PostgreSQL image and has Docker volume `docktuna_optuna_postgres_volume` mapped to its storage.
 
-### Enter `optuna_app` Container
+### Enter the App Container
 
 ```
 docker exec -it optuna_app /bin/zsh
 ```
-This will take you a `zsh` prompt in working directory `/home/gen_user/project/` inside the `optuna_app` container. This container path is mapped to the local project root, so the output of `ls` should match the contents of your local repo root director:
-```
-LICENSE  README.md  coverage.xml  docker  environment.yml  poetry.lock  pyproject.toml  src  test
-```
+This opens a shell inside the container at `/home/gen_user/project`, which is mapped to your host repo root.
 
-## Use a Poetry Environment
 
+### Install Python Package in Poetry Environment
 
 ```
 poetry install
 ```
+Expected output:
+
+```
+Installing dependencies from lock file
+No dependencies to install or update
+Installing the current project: docktuna (0.1.0)
+```
+
+### Run Tests
+
 ```
 poetry run pytest
 ```
 Expected Output:
 ```
-platform linux -- Python 3.12.9, pytest-8.3.5, pluggy-1.5.0
+====================== test session starts =================
+platform linux -- Python 3.13.3, pytest-8.3.5, pluggy-1.5.0
 rootdir: /home/gen_user/project
 configfile: pyproject.toml
-plugins: cov-6.0.0
+plugins: anyio-4.9.0, cov-6.0.0
 collected 19 items                                                                                                                               
 
 test/test_db_instance.py ...                                                                                                               [ 15%]
 test/test_optuna_db.py ............                                                                                                        [ 78%]
 test/test_tuning_scripts.py ....                                                                                                           [100%]
 
----------- coverage: platform linux, python 3.12.9-final-0 -----------
+---------- coverage: platform linux, python 3.13.3-final-0 -----------
 Name                                    Stmts   Miss Branch BrPart  Cover
 -------------------------------------------------------------------------
 src/docktuna/__init__.py                    0      0      0      0   100%
@@ -92,26 +134,87 @@ src/docktuna/simple_tune.py                25      0      2      0   100%
 -------------------------------------------------------------------------
 TOTAL                                     176      0     12      1    99%
 Coverage XML written to file coverage.xml
-
-=========================================== 19 passed in 11.61s ===========================================
+=========================== 19 passed in 9.71s =============================
 ```
-
+### Check Database Connectivity
 
 ```
 poetry run python test/check_connections.py
+```
+Expected output:
+```
 Successfully checked for existing studies in:
 	Database model_tuning on host postgres_for_optuna as user tuner.
 	Number of studies found = 4
 ```
 
-## Use a Conda Environment
+### Run Example Studies
+
+
+```shell
+poetry run python src/docktuna/simple_tune.py
+poetry run python src/docktuna/gpu_tune.py
+```
+
+## Customizing for a a New Project
+
+When adapting this template for your own tuning experiments:
+
+### 1. Add/Update Dependencies
+
+- Edit pyproject.toml to add or remove Poetry-managed packages
+- If needed, update `environment.yml` to add Conda-managed dependencies (e.g., `cudatoolkit`, etc.)
+
+
+### 2. Define Your Optuna Studies
+
+- Use `src/docktuna/simple_tune.py` or `gpu_tune.py` as templates for your tuning logic.
+- Refer to the [API documentation](https://duanegoodner.github.io/docktuna/) for details on `optuna_db` utilities to manage connections and studies.
+
+
+### 3. Rebuild the Image
+
+After updating dependencies and/or Python code:
 
 ```
-conda env create -f environment.yml
-conda activate docktuna
-pip install .
+cd docker/docktuna
+UID=$(id -u) GID=$(id -g) docker compose build
 ```
 
+### 4. Restart the Containers
 ```
-pytest
+UID=$(id -u) GID=$(id -g) docker compose up -d --force-recreate
 ```
+
+### Installing Additional Conda Packages
+
+If a package is better managed by Conda instead of Poetry (e.g. `opencv`), you can:
+1. Add it to `environment.yml` under `dependencies`:
+```
+- opencv
+```
+2. Then rebuild
+```
+UID=$(id -u) GID=$(id -g) docker compose build
+```
+This ensures the package gets installed during image build into the Conda environment that Poetry also uses.
+
+
+## Final Notes
+
+- All development happens inside the optuna_app container.
+
+- PostgreSQL is initialized with Optuna-ready schema using Docker entrypoint scripts.
+
+- No need to install anything locally besides Docker and NVIDIA support (if using GPU).
+
+- Secrets are stored locally (in `./docker/secrets`) and are **not version controlled**.
+
+
+Happy tuning 🎯
+
+
+
+
+
+
