@@ -25,7 +25,7 @@ def check_for_tuning_studies(db: OptunaDatabase):
     try:
         tuning_studies = db.get_all_studies()
         print(
-            f"Successfully checked for existing studies in:\n"
+            f"Successfully checked for existing Optuna studies in:\n"
             f"\tDatabase {db.db_name} on host {db.hostname} as user {db.username}.\n"
             f"\tNumber of studies found = {len(tuning_studies)}"
         )

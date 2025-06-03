@@ -10,6 +10,7 @@ services:
     env_file:
       - .env
     image: optuna_app
+    # GPU deployment moved to docker-compose.gpu.yml
     # deploy:
     #   resources:
     #     reservations:
