@@ -10,9 +10,6 @@ __pycache__/
 
 docker/secrets/*
 !docker/secrets/.gitkeep
-
-
-
 docker/.env
 
 logs/*
@@ -21,4 +18,6 @@ logs/*
 poetry.lock
 
 .coverage
+
+site/
 
