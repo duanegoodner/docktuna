@@ -10,13 +10,14 @@ services:
     env_file:
       - .env
     image: optuna_app
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [ gpu ]
+    # GPU deployment moved to docker-compose.gpu.yml
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [ gpu ]
     secrets:
       - optuna_db_user_password
     build:
