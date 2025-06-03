@@ -19,5 +19,5 @@ poetry.lock
 
 .coverage
 
-docs/site/
+site/
 
